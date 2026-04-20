@@ -1,0 +1,10 @@
+flask
+flask-cors
+scikit-learn
+numpy
+pandas
+matplotlib
+seaborn
+collections
+datetime
+gunicorn

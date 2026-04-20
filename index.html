@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineMatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #13131c;
+      --surface2: #1c1c2a;
+      --border: rgba(255, 255, 255, 0.07);
+      --accent: #e8433a;
+      --accent2: #ff8c42;
+      --gold: #f5c842;
+      --text: #f0eee8;
+      --muted: #7a7a8a;
+      --tag-bg: rgba(232, 67, 58, 0.12);
+      --tag-text: #ff8c8c;
+      --rec-glow: rgba(232, 67, 58, 0.15);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── noise grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      background-size: 150px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─────────────────────────────────────────
+   LANDING PAGE
+───────────────────────────────────────── */
+    #page-landing {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-wrap {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(5rem, 18vw, 10rem);
+      letter-spacing: 0.04em;
+      line-height: 0.9;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%, var(--gold) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeUp 0.8s ease both;
+    }
+
+    .tagline {
+      font-size: 0.95rem;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+      animation: fadeUp 0.8s 0.1s ease both;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 420px;
+      animation: fadeUp 0.8s 0.2s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      left: -60px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(232, 67, 58, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .login-card label {
+      display: block;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .login-card input[type="number"] {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1.1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1.05rem;
+      outline: none;
+      transition: border-color 0.2s;
+      -moz-appearance: textfield;
+    }
+
+    .login-card input::-webkit-outer-spin-button,
+    .login-card input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+    }
+
+    .login-card input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-go {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      padding: 0 1.4rem;
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn-go:hover {
+      background: #d63830;
+    }
+
+    .btn-go:active {
+      transform: scale(0.97);
+    }
+
+    .error-msg {
+      margin-top: 0.9rem;
+      font-size: 0.85rem;
+      color: var(--accent);
+      min-height: 1.2em;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .error-msg.show {
+      opacity: 1;
+    }
+
+    .hint {
+      margin-top: 1.4rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    .hint span {
+      color: var(--muted);
+    }
+
+    #sample-ids {
+      color: rgba(245, 200, 66, 0.75);
+    }
+
+    /* ─────────────────────────────────────────
+   RESULTS PAGE
+───────────────────────────────────────── */
+    #page-results {
+      display: none;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 2rem;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      background: rgba(10, 10, 15, 0.85);
+      z-index: 10;
+    }
+
+    .top-logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.8rem;
+      letter-spacing: 0.05em;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    .user-badge strong {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .btn-back {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.4rem 1rem;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .btn-back:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .results-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      min-height: calc(100vh - 65px);
+    }
+
+    @media (max-width: 860px) {
+      .results-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ── column shared ── */
+    .col {
+      padding: 2rem;
+      overflow-y: auto;
+    }
+
+    .col-watched {
+      border-right: 1px solid var(--border);
+    }
+
+    .col-title {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .col-title h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.05em;
+      font-weight: 400;
+    }
+
+    .col-count {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── skeleton loader ── */
+    .skeleton-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .skeleton-card {
+      background: var(--surface);
+      border-radius: 12px;
+      height: 76px;
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    /* ── movie card ── */
+    .movie-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      animation: fadeUp 0.4s ease both;
+      transition: border-color 0.2s;
+    }
+
+    .movie-card:hover {
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .movie-card.rec-card {
+      border-color: rgba(232, 67, 58, 0.2);
+      background: linear-gradient(135deg, var(--surface) 60%, rgba(232, 67, 58, 0.04));
+    }
+
+    .movie-card.rec-card:hover {
+      border-color: rgba(232, 67, 58, 0.45);
+    }
+
+    .card-rank {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      color: var(--muted);
+      min-width: 28px;
+      text-align: center;
+      line-height: 1;
+      padding-top: 2px;
+    }
+
+    .rec-card .card-rank {
+      color: var(--accent);
+    }
+
+    .card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+      line-height: 1.4;
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card-genres {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 6px;
+    }
+
+    .genre-tag {
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      font-size: 0.7rem;
+      padding: 2px 7px;
+      border-radius: 20px;
+      letter-spacing: 0.02em;
+    }
+
+    .card-score {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* star rating */
+    .stars {
+      display: flex;
+      gap: 2px;
+    }
+
+    .star {
+      width: 11px;
+      height: 11px;
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      background: var(--muted);
+    }
+
+    .star.on {
+      background: var(--gold);
+    }
+
+    .star.half {
+      background: linear-gradient(90deg, var(--gold) 50%, var(--muted) 50%);
+    }
+
+    .score-num {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--gold);
+    }
+
+    .score-label {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ── glow divider for rec column ── */
+    .col-recommend {
+      background: linear-gradient(180deg, transparent 0%, rgba(232, 67, 58, 0.02) 100%);
+    }
+
+    /* ── empty state ── */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      gap: 8px;
+    }
+
+    /* ── animations ── */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loading-spinner {
+      width: 22px;
+      height: 22px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════ -->
+  <section id="page-landing">
+    <div class="logo-wrap">
+      <div class="logo">CineMatch</div>
+      <div class="tagline">Your personal movie intelligence</div>
+    </div>
+
+    <div class="login-card">
+      <label for="uid-input">Enter your User ID</label>
+      <div class="input-row">
+        <input type="number" id="uid-input" placeholder="e.g. 1" min="1" autocomplete="off">
+        <button class="btn-go" id="btn-go" onclick="handleLogin()">Go →</button>
+      </div>
+      <div class="error-msg" id="error-msg">User ID not found. Try one below.</div>
+      <div class="hint">
+        Not sure of your ID? Try one of these:<br>
+        <span id="sample-ids">loading…</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+     RESULTS PAGE
+══════════════════════════════════════ -->
+  <section id="page-results">
+    <div class="top-bar">
+      <div class="top-logo">CineMatch</div>
+      <div class="user-badge">Viewing profile for <strong id="display-uid">—</strong></div>
+      <button class="btn-back" onclick="goBack()">← Back</button>
+    </div>
+
+    <div class="results-body">
+      <!-- Left: watched -->
+      <div class="col col-watched">
+        <div class="col-title">
+          <h2>Your Ratings</h2>
+          <span class="col-count" id="watched-count"></span>
+        </div>
+        <div id="watched-list">
+          <div class="skeleton-list">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: recommendations -->
+      <div class="col col-recommend">
+        <div class="col-title">
+          <h2>Recommended</h2>
+          <span class="col-count" id="rec-count"></span>
+        </div>
+        <div id="rec-list">
+          <div class="skeleton-list">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const API = 'http://localhost:5001/api';
+
+    // ── Load sample IDs on startup ──────────────────────────────────────────────
+    async function loadSamples() {
+      try {
+        const res = await fetch(`${API}/users/sample`);
+        const data = await res.json();
+        document.getElementById('sample-ids').textContent =
+          data.sample.slice(0, 10).join(', ');
+      } catch {
+        document.getElementById('sample-ids').textContent =
+          'Could not reach server — is app.py running?';
+      }
+    }
+    loadSamples();
+
+    // ── Enter key on input ──────────────────────────────────────────────────────
+    document.getElementById('uid-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    // ── Login handler ───────────────────────────────────────────────────────────
+    async function handleLogin() {
+      const uid = parseInt(document.getElementById('uid-input').value);
+      const errEl = document.getElementById('error-msg');
+      const btn = document.getElementById('btn-go');
+      errEl.classList.remove('show');
+
+      if (!uid || uid < 1) {
+        errEl.textContent = 'Please enter a valid User ID.';
+        errEl.classList.add('show');
+        return;
+      }
+
+      btn.textContent = '…';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`${API}/validate/${uid}`);
+        if (!res.ok) {
+          const data = await res.json();
+          errEl.textContent = `User ID ${uid} not found. Try: ${data.sample_ids?.slice(0, 5).join(', ')}`;
+          errEl.classList.add('show');
+          btn.textContent = 'Go →';
+          btn.disabled = false;
+          return;
+        }
+
+        // Valid user — go to results
+        showResults(uid);
+      } catch {
+        errEl.textContent = 'Cannot reach server. Make sure app.py is running.';
+        errEl.classList.add('show');
+        btn.textContent = 'Go →';
+        btn.disabled = false;
+      }
+    }
+
+    // ── Show results page ───────────────────────────────────────────────────────
+    function showResults(uid) {
+      document.getElementById('page-landing').style.display = 'none';
+      document.getElementById('page-results').style.display = 'block';
+      document.getElementById('display-uid').textContent = `User ${uid}`;
+      document.getElementById('btn-go').textContent = 'Go →';
+      document.getElementById('btn-go').disabled = false;
+
+      // Reset to skeletons
+      setSkeletons('watched-list', 5);
+      setSkeletons('rec-list', 5);
+      document.getElementById('watched-count').textContent = '';
+      document.getElementById('rec-count').textContent = '';
+
+      // Fetch in parallel
+      fetchWatched(uid);
+      fetchRecommend(uid);
+    }
+
+    function setSkeletons(id, n) {
+      const el = document.getElementById(id);
+      el.innerHTML = '<div class="skeleton-list">' +
+        Array(n).fill('<div class="skeleton-card"></div>').join('') +
+        '</div>';
+    }
+
+    // ── Fetch watched movies ────────────────────────────────────────────────────
+    async function fetchWatched(uid) {
+      try {
+        const res = await fetch(`${API}/user/${uid}/watched`);
+        const data = await res.json();
+        renderWatched(data.watched || []);
+      } catch {
+        document.getElementById('watched-list').innerHTML =
+          '<div class="empty-state">Failed to load watched movies.</div>';
+      }
+    }
+
+    function renderWatched(movies) {
+      const el = document.getElementById('watched-list');
+      document.getElementById('watched-count').textContent =
+        `${movies.length} movie${movies.length !== 1 ? 's' : ''}`;
+
+      if (!movies.length) {
+        el.innerHTML = '<div class="empty-state">No ratings found for this user.</div>';
+        return;
+      }
+
+      el.innerHTML = movies.map((m, i) => `
+    <div class="movie-card" style="animation-delay:${i * 0.04}s">
+      <div class="card-rank">${i + 1}</div>
+      <div class="card-info">
+        <div class="card-title" title="${esc(m.title)}">${esc(m.title)}</div>
+        <div class="card-genres">
+          ${m.genres.split(', ').map(g => `<span class="genre-tag">${esc(g)}</span>`).join('')}
+        </div>
+        <div class="card-score">
+          ${starsHtml(m.rating)}
+          <span class="score-num">${m.rating.toFixed(1)}</span>
+          <span class="score-label">/ 5</span>
+        </div>
+      </div>
+    </div>`).join('');
+    }
+
+    // ── Fetch recommendations ───────────────────────────────────────────────────
+    async function fetchRecommend(uid) {
+      try {
+        const res = await fetch(`${API}/user/${uid}/recommend?n=50`);
+        const data = await res.json();
+        renderRecs(data.recommendations || []);
+      } catch {
+        document.getElementById('rec-list').innerHTML =
+          '<div class="empty-state">Failed to load recommendations.</div>';
+      }
+    }
+
+    function renderRecs(movies) {
+      const el = document.getElementById('rec-list');
+      document.getElementById('rec-count').textContent =
+        `${movies.length} picks`;
+
+      if (!movies.length) {
+        el.innerHTML = '<div class="empty-state">No recommendations found.</div>';
+        return;
+      }
+
+      el.innerHTML = movies.map((m, i) => `
+    <div class="movie-card rec-card" style="animation-delay:${i * 0.05}s">
+      <div class="card-rank">${i + 1}</div>
+      <div class="card-info">
+        <div class="card-title" title="${esc(m.title)}">${esc(m.title)}</div>
+        <div class="card-genres">
+          ${m.genres.split(', ').map(g => `<span class="genre-tag">${esc(g)}</span>`).join('')}
+        </div>
+        <div class="card-score">
+          ${starsHtml(m.score)}
+          <span class="score-num">${m.score.toFixed(2)}</span>
+          <span class="score-label">predicted</span>
+        </div>
+      </div>
+    </div>`).join('');
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────────────────────
+    function goBack() {
+      document.getElementById('page-results').style.display = 'none';
+      document.getElementById('page-landing').style.display = 'flex';
+      document.getElementById('error-msg').classList.remove('show');
+      document.getElementById('uid-input').value = '';
+    }
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function starsHtml(rating) {
+      const full = Math.floor(rating);
+      const frac = rating - full;
+      const empty = 5 - full - (frac >= 0.25 ? 1 : 0);
+      let h = '<div class="stars">';
+      for (let i = 0; i < full; i++)             h += '<div class="star on"></div>';
+      if (frac >= 0.25 && frac < 0.75) h += '<div class="star half"></div>';
+      else if (frac >= 0.75) h += '<div class="star on"></div>';
+      for (let i = 0; i < Math.max(0, empty); i++) h += '<div class="star"></div>';
+      return h + '</div>';
+    }
+  </script>
+</body>
+
+</html>

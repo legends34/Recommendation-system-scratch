@@ -7,7 +7,7 @@ Created as a first year project under Basics Of Machine Learning Lab at DTU , Ci
 ## 🚀 Key Features
 
 * **6-Model Hybrid Architecture**: Ranges from baseline Biased SVD to a fully weighted ensemble of content and neighborhood models.
-* **Dynamic Ensemble Learning**: A custom-weighted blending algorithm that adjusts model contributions based on real-time error backpropagation.(This was used first , but then a better accuracy was achieved with a different set of weights , so used that directly)
+* **Dynamic Ensemble Learning**: A custom-weighted blending algorithm that adjusts model contributions based on real-time error backpropagation.(This was used first , but somehow , the results couldnot be achieved again , so used the first time learned weights directly)
 * **Contextual Genre Embeddings**: Enhances latent factor movie vectors with genre-specific weights.
 * **Optimized Inference**: Utilizes a Top-20 Neighborhood Strategy for rapid similarity computation.
 * **Live Web Interface**: A clean, responsive Flask-based UI for real-time movie discovery.

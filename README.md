@@ -33,11 +33,11 @@ The system evaluates and blends six distinct algorithmic approaches:
 
 The model was trained using **Stochastic Gradient Descent (SGD)** with L2 regularization. 
 
-| Metric | CineMatch (Ensemble) | BellKor (Netflix Prize) |
-| :--- | :--- | :--- |
-| **Test RMSE** | **0.8647** | **0.8567** |
+| Metric | Ensemble | Model5 : SVD+Cosine +Genre | Model3 : SVD+Genre | Model4 : SVD+Cosine sim | Model1 : SVD | Model2 : Cosine similarity |
+| :------- | :------- | :------- |:------- |:------- |:------- |:------- |
+| **Test RMSE** | **0.8647** | **0.8656** | **0.8659** | **0.8660** | **0.8661** | **0.9743** |
 
----
+-------
 
 ## 🛠 Tech Stack
 
